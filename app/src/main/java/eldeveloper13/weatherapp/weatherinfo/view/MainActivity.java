@@ -1,4 +1,4 @@
-package eldeveloper13.weatherapp;
+package eldeveloper13.weatherapp.weatherinfo.view;
 
 import android.os.Bundle;
 import android.view.View;
@@ -10,9 +10,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import eldeveloper13.weatherapp.R;
+import eldeveloper13.weatherapp.WeatherAppApplication;
+import eldeveloper13.weatherapp.services.darksky.ForecastResponse;
+import eldeveloper13.weatherapp.weatherinfo.MainContract;
+import eldeveloper13.weatherapp.weatherinfo.presenter.MainPresenter;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, MainContract.View {
@@ -20,12 +28,22 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.weather_tabs)
     View mWeatherTabs;
 
+    @BindView(R.id.degree)
+    TextView mDegreeTextView;
+
+    @BindView(R.id.weather_icon)
+    TextView mWeatherIconTextView;
+
+    @Inject
+    MainContract.Presenter mPresenter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         ButterKnife.bind(this);
+        ((WeatherAppApplication)getApplication()).getAppComponent().inject(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -38,25 +56,19 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+    }
 
-//        Retrofit retrofit = new Retrofit.Builder()
-//                .baseUrl("https://api.darksky.net")
-//                .addConverterFactory(GsonConverterFactory.create())
-//                .build();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mPresenter.attachView(this);
+        mPresenter.getCity();
+    }
 
-//        DarkSkyService darkSkyService = retrofit.create(DarkSkyService.class);
-//        Call<ForecastResponse> call = darkSkyService.getForecast("43.6532", "-79.3832");
-//        call.enqueue(new Callback<ForecastResponse>() {
-//            @Override
-//            public void onResponse(Call<ForecastResponse> call, Response<ForecastResponse> response) {
-//                System.out.println(response.body().toString());
-//            }
-//
-//            @Override
-//            public void onFailure(Call<ForecastResponse> call, Throwable t) {
-//
-//            }
-//        });
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mPresenter.detachView();
     }
 
     @Override
@@ -99,6 +111,7 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_camera) {
             // Handle the camera action
+            mPresenter.getWeather();
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
@@ -116,8 +129,15 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+
     @Override
     public void setWeatherTabsVisible(boolean visible) {
         mWeatherTabs.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void showCurrentWeather(ForecastResponse forecast) {
+        mDegreeTextView.setText(Double.toString(forecast.getCurrently().getTemperature()));
+        mWeatherIconTextView.setText(forecast.getCurrently().getIcon());
     }
 }
