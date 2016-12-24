@@ -13,6 +13,14 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import eldeveloper13.weatherapp.services.darksky.DarkSkyService;
+import eldeveloper13.weatherapp.services.darksky.ForecastResponse;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -23,15 +31,6 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -40,6 +39,25 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+//        Retrofit retrofit = new Retrofit.Builder()
+//                .baseUrl("https://api.darksky.net")
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .build();
+
+//        DarkSkyService darkSkyService = retrofit.create(DarkSkyService.class);
+//        Call<ForecastResponse> call = darkSkyService.getForecast("43.6532", "-79.3832");
+//        call.enqueue(new Callback<ForecastResponse>() {
+//            @Override
+//            public void onResponse(Call<ForecastResponse> call, Response<ForecastResponse> response) {
+//                System.out.println(response.body().toString());
+//            }
+//
+//            @Override
+//            public void onFailure(Call<ForecastResponse> call, Throwable t) {
+//
+//            }
+//        });
     }
 
     @Override

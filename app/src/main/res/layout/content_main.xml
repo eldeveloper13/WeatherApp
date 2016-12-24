@@ -13,7 +13,10 @@
     tools:showIn="@layout/app_bar_main">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello World!" />
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:text="You haven't added a location yet.  Add a location from the menu on the left to see the weather."
+        android:textSize="16sp"/>
 </RelativeLayout>
