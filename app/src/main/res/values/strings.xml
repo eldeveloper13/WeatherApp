@@ -5,4 +5,5 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+    <string name="no_city_instruction">You haven\'t added a location yet. Add a location from the menu on the left to see the weather.</string>
 </resources>
