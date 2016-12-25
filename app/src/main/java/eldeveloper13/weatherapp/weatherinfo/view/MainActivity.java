@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import javax.inject.Inject;
@@ -18,9 +19,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import eldeveloper13.weatherapp.R;
 import eldeveloper13.weatherapp.WeatherAppApplication;
-import eldeveloper13.weatherapp.services.darksky.ForecastResponse;
 import eldeveloper13.weatherapp.weatherinfo.MainContract;
-import eldeveloper13.weatherapp.weatherinfo.presenter.MainPresenter;
+import eldeveloper13.weatherapp.weatherinfo.model.CurrentWeatherModel;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, MainContract.View {
@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity
     TextView mDegreeTextView;
 
     @BindView(R.id.weather_icon)
-    TextView mWeatherIconTextView;
+    ImageView mWeatherIconImageView;
 
     @Inject
     MainContract.Presenter mPresenter;
@@ -130,14 +130,26 @@ public class MainActivity extends AppCompatActivity
     }
 
 
+    //region MainContract.View
     @Override
     public void setWeatherTabsVisible(boolean visible) {
         mWeatherTabs.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
-    public void showCurrentWeather(ForecastResponse forecast) {
-        mDegreeTextView.setText(Double.toString(forecast.getCurrently().getTemperature()));
-        mWeatherIconTextView.setText(forecast.getCurrently().getIcon());
+    public void showCurrentWeather(CurrentWeatherModel model) {
+        mDegreeTextView.setText(Double.toString(model.getTemperature()));
+        mWeatherIconImageView.setImageResource(model.getWeatherIcon().getIconRes());
     }
+
+    @Override
+    public void showError() {
+        // TODO
+    }
+
+    @Override
+    public void showSpinner() {
+        // TODO
+    }
+    //endregion
 }

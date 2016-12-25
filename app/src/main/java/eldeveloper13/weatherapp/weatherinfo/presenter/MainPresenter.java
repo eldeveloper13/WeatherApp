@@ -5,9 +5,14 @@ import javax.inject.Inject;
 import eldeveloper13.weatherapp.services.darksky.DarkSkyService;
 import eldeveloper13.weatherapp.services.darksky.ForecastResponse;
 import eldeveloper13.weatherapp.weatherinfo.MainContract;
+import eldeveloper13.weatherapp.weatherinfo.model.CurrentWeatherModel;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import rx.Observable;
+import rx.Subscriber;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 public class MainPresenter implements MainContract.Presenter {
 
@@ -37,18 +42,29 @@ public class MainPresenter implements MainContract.Presenter {
 
     @Override
     public void getWeather() {
-        Call<ForecastResponse> call = mDarkSkyService.getForecast("43.6532", "-79.3832", DarkSkyService.CA);
-        call.enqueue(new Callback<ForecastResponse>() {
-            @Override
-            public void onResponse(Call<ForecastResponse> call, Response<ForecastResponse> response) {
-                mView.showCurrentWeather(response.body());
-            }
+        mView.showSpinner();
+        Observable<ForecastResponse> observable = mDarkSkyService.getForecast("43.6532", "-79.3832", DarkSkyService.CA);
+        observable.map(new Func1<ForecastResponse, CurrentWeatherModel>() {
+                    @Override
+                    public CurrentWeatherModel call(ForecastResponse forecastResponse) {
+                        return new CurrentWeatherModel(forecastResponse.getCurrently());
+                    }
+                })
+                .subscribe(new Subscriber<CurrentWeatherModel>() {
+                    @Override
+                    public void onCompleted() {
 
-            @Override
-            public void onFailure(Call<ForecastResponse> call, Throwable t) {
+                    }
 
-            }
-        });
+                    @Override
+                    public void onError(Throwable e) {
+                        mView.showError();
+                    }
 
+                    @Override
+                    public void onNext(CurrentWeatherModel currentWeatherModel) {
+                        mView.showCurrentWeather(currentWeatherModel);
+                    }
+                });
     }
 }

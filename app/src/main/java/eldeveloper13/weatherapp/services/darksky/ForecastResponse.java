@@ -20,22 +20,28 @@ public class ForecastResponse {
         long time;
         String summary;
         String icon;
+        int dewPoint;
+        double humidity;
+        double cloudCover;
         int nearestStormDistance;
         int nearestStormBearing;
+        double ozone;
+        double precipAccumulation;
         double precipIntensity;
+        double precipIntensityMax;
+        long precipIntensityMaxTime;
         double precipProbability;
+        String precipType;
+        double pressure;
+        long sunriseTime;
+        long sunsetTime;
         double temperature;
         double temperatureMin;
         double temperatureMax;
         double apparentTemperature;
-        double dewPoint;
-        double humidity;
         int windBearing;
         double windSpeed;
         double visibility;
-        double cloudCover;
-        double pressure;
-        double ozone;
     }
 
     @Data

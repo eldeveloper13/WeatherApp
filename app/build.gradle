@@ -30,6 +30,7 @@ dependencies {
 
     // Retrofit2
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
+    compile 'com.squareup.retrofit2:adapter-rxjava:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
 
     // Butterknife
@@ -45,8 +46,19 @@ dependencies {
     compile 'com.google.dagger:dagger:2.8'
     provided 'javax.annotation:jsr250-api:1.0'
 
+    // RxJava
+    compile 'io.reactivex:rxjava:1.1.6'
+
     // Mockito
-    testCompile "org.mockito:mockito-core:1.+"
+    testCompile "org.mockito:mockito-core:2.+"
+
+    // Hamcrest Library
+    testCompile 'org.hamcrest:hamcrest-library:1.3'
+
+    // AssertJ
+    testCompile('com.squareup.assertj:assertj-android:1.1.1') {
+        exclude module: 'support-annotations'
+    }
 
     // Espresso
     androidTestCompile 'com.android.support:support-annotations:25.1.0'
