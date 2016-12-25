@@ -1,16 +1,16 @@
 package eldeveloper13.weatherapp.weatherinfo.presenter;
 
+import android.util.Log;
+
 import javax.inject.Inject;
 
 import eldeveloper13.weatherapp.services.darksky.DarkSkyService;
 import eldeveloper13.weatherapp.services.darksky.ForecastResponse;
 import eldeveloper13.weatherapp.weatherinfo.MainContract;
 import eldeveloper13.weatherapp.weatherinfo.model.CurrentWeatherModel;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import rx.Observable;
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
@@ -44,7 +44,9 @@ public class MainPresenter implements MainContract.Presenter {
     public void getWeather() {
         mView.showSpinner();
         Observable<ForecastResponse> observable = mDarkSkyService.getForecast("43.6532", "-79.3832", DarkSkyService.CA);
-        observable.map(new Func1<ForecastResponse, CurrentWeatherModel>() {
+        observable.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .map(new Func1<ForecastResponse, CurrentWeatherModel>() {
                     @Override
                     public CurrentWeatherModel call(ForecastResponse forecastResponse) {
                         return new CurrentWeatherModel(forecastResponse.getCurrently());
@@ -58,6 +60,7 @@ public class MainPresenter implements MainContract.Presenter {
 
                     @Override
                     public void onError(Throwable e) {
+                        Log.e(MainPresenter.this.getClass().getName(), e.getMessage());
                         mView.showError();
                     }
 

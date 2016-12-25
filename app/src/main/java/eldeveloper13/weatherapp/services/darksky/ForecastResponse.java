@@ -20,7 +20,7 @@ public class ForecastResponse {
         long time;
         String summary;
         String icon;
-        int dewPoint;
+        double dewPoint;
         double humidity;
         double cloudCover;
         int nearestStormDistance;

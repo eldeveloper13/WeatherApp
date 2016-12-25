@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="16dp">
+
+    <LinearLayout
+        android:id="@+id/temp_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/weather_icon_layout"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/degree_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp"
+            android:textSize="24sp"
+            tools:text="Temp: 10.0C"
+            android:layout_gravity="center_vertical"
+            />
+
+        <TextView
+            android:id="@+id/feels_like_textview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            tools:text="Feels like: s-10.0C"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@id/weather_icon_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+
+        android:orientation="vertical"
+        >
+
+        <ImageView
+            android:id="@+id/weather_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:src="@drawable/ic_clear_day"
+            />
+
+        <TextView
+            android:id="@+id/weather_icon_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:textSize="14sp"
+            tools:text="Clear"
+            />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/last_updated"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_below="@id/temp_layout"
+        android:textSize="12sp"
+        tools:text="Last Update: 11:23:04 am"
+        />
+</RelativeLayout>

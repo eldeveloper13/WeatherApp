@@ -1,8 +1,12 @@
 package eldeveloper13.weatherapp.weatherinfo.view;
 
 import android.os.Bundle;
-import android.view.View;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -10,8 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.view.View;
 
 import javax.inject.Inject;
 
@@ -28,14 +31,14 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.weather_tabs)
     View mWeatherTabs;
 
-    @BindView(R.id.degree)
-    TextView mDegreeTextView;
-
-    @BindView(R.id.weather_icon)
-    ImageView mWeatherIconImageView;
+    @BindView(R.id.bottom_navigation)
+    BottomNavigationView mBottomNavigationView;
 
     @Inject
     MainContract.Presenter mPresenter;
+
+    Fragment mFragment;
+    FragmentManager mFragmentManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +59,29 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        mFragmentManager = getSupportFragmentManager();
+        mFragment = new CurrentWeatherFragment();
+        final FragmentTransaction transaction = mFragmentManager.beginTransaction();
+        transaction.replace(R.id.navigation_main_content, mFragment).commit();
+
+        mBottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_current:
+                        mFragment = CurrentWeatherFragment.newInstance();
+                        break;
+                    case R.id.action_short_term:
+                        break;
+                    case R.id.action_long_term:
+                        break;
+                }
+                final FragmentTransaction transaction = mFragmentManager.beginTransaction();
+                transaction.replace(R.id.navigation_main_content, mFragment).commit();
+                return false;
+            }
+        });
     }
 
     @Override
@@ -63,6 +89,7 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
         mPresenter.attachView(this);
         mPresenter.getCity();
+        mPresenter.getWeather();
     }
 
     @Override
@@ -137,19 +164,20 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void showSpinner() {
+        // TODO
+    }
+
+    @Override
     public void showCurrentWeather(CurrentWeatherModel model) {
-        mDegreeTextView.setText(Double.toString(model.getTemperature()));
-        mWeatherIconImageView.setImageResource(model.getWeatherIcon().getIconRes());
+        if (mFragment instanceof CurrentWeatherFragment) {
+            ((CurrentWeatherFragment) mFragment).showCurrentWeather(model);
+        }
     }
 
     @Override
     public void showError() {
-        // TODO
-    }
 
-    @Override
-    public void showSpinner() {
-        // TODO
     }
     //endregion
 }

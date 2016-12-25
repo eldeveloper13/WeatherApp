@@ -1,6 +1,5 @@
 package eldeveloper13.weatherapp.weatherinfo;
 
-import eldeveloper13.weatherapp.services.darksky.ForecastResponse;
 import eldeveloper13.weatherapp.weatherinfo.model.CurrentWeatherModel;
 
 public interface MainContract {
@@ -13,9 +12,10 @@ public interface MainContract {
     }
 
     interface Presenter {
+        void getCity();
         void getWeather();
+
         void attachView(MainContract.View view);
         void detachView();
-        void getCity();
     }
 }
