@@ -6,7 +6,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import retrofit2.http.GET;
-import retrofit2.http.Headers;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import rx.Observable;
@@ -15,7 +14,6 @@ public interface DarkSkyService {
 
     static final String KEY = "0246a28fc0ef2cb8351d4d4f24f382f3";
 
-    @Headers("Cache-Control: max-age=600")
     @GET("forecast/"+KEY+"/{latitude},{longitude}")
     Observable<ForecastResponse> getForecast(@Path("latitude") String latitude,
                                                    @Path("longitude") String longitude,

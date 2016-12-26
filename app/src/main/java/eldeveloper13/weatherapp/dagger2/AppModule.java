@@ -9,6 +9,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 import eldeveloper13.weatherapp.services.darksky.DarkSkyService;
+import eldeveloper13.weatherapp.services.network.CacheRevalidationInterceptor;
 import eldeveloper13.weatherapp.weatherinfo.MainContract;
 import eldeveloper13.weatherapp.weatherinfo.presenter.MainPresenter;
 import okhttp3.Cache;
@@ -41,6 +42,7 @@ public class AppModule {
 
         return new OkHttpClient.Builder()
                 .cache(cache)
+                .addNetworkInterceptor(new CacheRevalidationInterceptor())
                 .build();
     }
 
