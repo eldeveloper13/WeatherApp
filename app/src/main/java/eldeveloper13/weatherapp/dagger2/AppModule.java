@@ -8,6 +8,8 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import eldeveloper13.weatherapp.db.WeatherDbHelper;
+import eldeveloper13.weatherapp.provider.WeatherDataProvider;
 import eldeveloper13.weatherapp.services.darksky.DarkSkyService;
 import eldeveloper13.weatherapp.services.network.CacheRevalidationInterceptor;
 import eldeveloper13.weatherapp.weatherinfo.MainContract;
@@ -61,5 +63,17 @@ public class AppModule {
     @Provides
     MainContract.Presenter provideMainPresenter(MainPresenter presenter) {
         return presenter;
+    }
+
+    @Provides
+    @Singleton
+    WeatherDataProvider provideWeatherDataProvider(DarkSkyService darkSkyService, WeatherDbHelper dbHelper) {
+        return new WeatherDataProvider(darkSkyService, dbHelper);
+    }
+
+    @Provides
+    @Singleton
+    WeatherDbHelper provideWeatherDatabase(Application application) {
+        return new WeatherDbHelper(application);
     }
 }

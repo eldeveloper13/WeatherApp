@@ -6,13 +6,20 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import eldeveloper13.weatherapp.provider.WeatherDataProvider;
 import eldeveloper13.weatherapp.services.darksky.DarkSkyService;
 import eldeveloper13.weatherapp.services.darksky.ForecastResponse;
 import eldeveloper13.weatherapp.weatherinfo.MainContract;
 import eldeveloper13.weatherapp.weatherinfo.model.CurrentWeatherModel;
 import rx.Observable;
+import rx.Scheduler;
+import rx.android.plugins.RxAndroidPlugins;
+import rx.android.plugins.RxAndroidSchedulersHook;
+import rx.schedulers.Schedulers;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -21,7 +28,7 @@ import static org.mockito.Mockito.when;
 public class MainPresenterTest {
 
     @Mock
-    DarkSkyService mDarkSkyService;
+    WeatherDataProvider mWeatherDataProvider;
 
     @Mock
     MainContract.View mView;
@@ -30,24 +37,29 @@ public class MainPresenterTest {
 
     @Before
     public void setup() {
+        RxAndroidPlugins.getInstance().registerSchedulersHook(new RxAndroidSchedulersHook() {
+            @Override
+            public Scheduler getMainThreadScheduler() {
+                return Schedulers.immediate();
+            }
+        });
         MockitoAnnotations.initMocks(this);
 
-        mSubject = new MainPresenter(mDarkSkyService);
+        mSubject = new MainPresenter(mWeatherDataProvider);
 
         mSubject.attachView(mView);
     }
 
     @Test
     public void getWeather_callsShowWeatherData() {
-        ForecastResponse mockResponse = mock(ForecastResponse.class);
-        ForecastResponse.DataPoint mockDataPoint = mock(ForecastResponse.DataPoint.class);
-        when(mDarkSkyService.getForecast(anyString(), anyString(), anyString())).thenReturn(Observable.just(mockResponse));
-        when(mockResponse.getCurrently()).thenReturn(mockDataPoint);
-        when(mockDataPoint.getTime()).thenReturn(12345L);
-        when(mockDataPoint.getTemperature()).thenReturn(12.5);
-        when(mockDataPoint.getApparentTemperature()).thenReturn(8.7);
-        when(mockDataPoint.getIcon()).thenReturn("partly-cloudy-day");
-        when(mockDataPoint.getPrecipType()).thenReturn("rain");
+        CurrentWeatherModel mockResponse = mock(CurrentWeatherModel.class);
+        when(mWeatherDataProvider.getCurrentWeather(anyDouble(), anyDouble(), anyString())).thenReturn(Observable.just(mockResponse));
+        when(mWeatherDataProvider.getCurrentWeather(anyDouble(), anyDouble(), anyString(), any(WeatherDataProvider.FetchStrategy.class))).thenReturn(Observable.just(mockResponse));
+        when(mockResponse.getTimestamp()).thenReturn(12345L);
+        when(mockResponse.getTemperature()).thenReturn(12.5);
+        when(mockResponse.getFeelsLike()).thenReturn(8.7);
+        when(mockResponse.getWeatherIcon()).thenReturn(CurrentWeatherModel.WeatherIcon.PartlyCloudyDay);
+        when(mockResponse.getPrecipType()).thenReturn(CurrentWeatherModel.PrecipType.Rain);
 
         mSubject.getWeather();
 
