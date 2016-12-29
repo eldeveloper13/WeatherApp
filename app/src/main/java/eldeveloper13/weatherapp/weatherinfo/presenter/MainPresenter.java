@@ -43,7 +43,7 @@ public class MainPresenter implements MainContract.Presenter {
     @Override
     public void getWeather() {
         mView.showSpinner();
-        Observable<CurrentWeatherModel> observable = mWeatherDataProvider.getCurrentWeather(43.6532, -79.3832, DarkSkyService.CA, WeatherDataProvider.FetchStrategy.FROM_NETWORK);
+        Observable<CurrentWeatherModel> observable = mWeatherDataProvider.getCurrentWeather(43.6532, -79.3832, DarkSkyService.CA, WeatherDataProvider.FetchStrategy.CACHE_THEN_NETWORK);
         observable
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<CurrentWeatherModel>() {

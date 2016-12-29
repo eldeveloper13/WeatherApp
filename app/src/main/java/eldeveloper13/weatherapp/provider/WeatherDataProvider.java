@@ -46,7 +46,7 @@ public class WeatherDataProvider {
                 ).first(new Func1<CurrentWeatherModel, Boolean>() {
                     @Override
                     public Boolean call(CurrentWeatherModel currentWeatherModel) {
-                        return !isDataExpired(currentWeatherModel);
+                        return currentWeatherModel != null && !isDataExpired(currentWeatherModel);
                     }
                 });
                 return source;
@@ -62,7 +62,52 @@ public class WeatherDataProvider {
     }
 
     private Observable<CurrentWeatherModel> getForecastFromDatabase(final double lat, final double lon) {
-        return Observable.empty();
+        return Observable.just(mWeatherDbHelper.queryWeatherLocation(lat, lon))
+                .map(new Func1<Long, Long>() {
+                    @Override
+                    public Long call(Long locationId) {
+                        Cursor cursor = mWeatherDbHelper.queryWeatherCurrentByLocationId(locationId);
+                        try {
+                            if (cursor.moveToFirst()) {
+                                return cursor.getLong(cursor.getColumnIndex(WeatherDbHelper.WeatherCurrent.COLUMN_CURRENT_DATAPOINT_ID));
+                            } else {
+                                return -1L;
+                            }
+                        } catch (Exception e) {
+                            Log.e("WeatherDataProvider", e.getMessage());
+                            return -1L;
+                        } finally {
+                            cursor.close();
+                        }
+                    }
+                }).map(new Func1<Long, CurrentWeatherModel>() {
+            @Override
+            public CurrentWeatherModel call(Long datapointId) {
+                if (datapointId == -1L) {
+                    return null;
+                }
+                Cursor cursor = mWeatherDbHelper.queryWeatherDatapoint(datapointId);
+                try {
+                    if (cursor.moveToFirst()) {
+                        CurrentWeatherModel model = new CurrentWeatherModel(
+                                cursor.getLong(cursor.getColumnIndex(WeatherDbHelper.WeatherDatapoint.COLUMN_TIMESTAMP)),
+                                cursor.getDouble(cursor.getColumnIndex(WeatherDbHelper.WeatherDatapoint.COLUMN_TEMPERATURE)),
+                                cursor.getDouble(cursor.getColumnIndex(WeatherDbHelper.WeatherDatapoint.COLUMN_FEELS_LIKE)),
+                                CurrentWeatherModel.PrecipType.getValue(cursor.getString(cursor.getColumnIndex(WeatherDbHelper.WeatherDatapoint.COLUMN_PRECIP_TYPE))),
+                                CurrentWeatherModel.WeatherIcon.getValue(cursor.getString(cursor.getColumnIndex(WeatherDbHelper.WeatherDatapoint.COLUMN_ICON)))
+                        );
+                        return model;
+                    } else {
+                        return null;
+                    }
+                } catch (Exception e) {
+                    Log.e("WeatherDataProvider", e.getMessage());
+                    return null;
+                } finally {
+                    cursor.close();
+                }
+            }
+        });
     }
 
     private Observable<CurrentWeatherModel> getForecastFromNetwork(double lat, double lon, @DarkSkyService.Units String units) {
@@ -84,80 +129,24 @@ public class WeatherDataProvider {
     }
 
     private void saveResponseToDB(ForecastResponse response) {
-        long locationId = insertIntoWeatherLocation(response.getLatitude(), response.getLongitude());
+        long locationId = mWeatherDbHelper.queryWeatherLocation(response.getLatitude(), response.getLongitude());
+        if (locationId == -1) {
+            locationId = mWeatherDbHelper.insertWeatherLocation(response.getLatitude(), response.getLongitude());
+        }
 
-        ForecastResponse.DataPoint dataPoint = response.getCurrently();
-        ContentValues datapointValues = new ContentValues();
-        datapointValues.put(WeatherDbHelper.WeatherDatapoint.COLUMN_TIMESTAMP, dataPoint.getTime());
-        datapointValues.put(WeatherDbHelper.WeatherDatapoint.COLUMN_TEMPERATURE, dataPoint.getTemperature());
-        datapointValues.put(WeatherDbHelper.WeatherDatapoint.COLUMN_FEELS_LIKE, dataPoint.getApparentTemperature());
-        datapointValues.put(WeatherDbHelper.WeatherDatapoint.COLUMN_ICON, dataPoint.getIcon());
+        ForecastResponse.DataPoint currently = response.getCurrently();
 
-        SQLiteDatabase db = mWeatherDbHelper.getWritableDatabase();
-        try {
-            Cursor cursor = db.query(WeatherDbHelper.WeatherCurrent.TABLE_NAME,
-                    new String[]{WeatherDbHelper.WeatherCurrent.COLUMN_CURRENT_DATAPOINT_ID},
-                    WeatherDbHelper.WeatherCurrent.COLUMN_LOCATION_ID + " = ?",
-                    new String[]{Long.toString(locationId)},
-                    null,
-                    null,
-                    null);
-            cursor.moveToFirst();
-            if (cursor.moveToFirst()) {
-                long datapointId = cursor.getLong(cursor.getColumnIndex(WeatherDbHelper.WeatherCurrent.COLUMN_CURRENT_DATAPOINT_ID));
-                db.update(WeatherDbHelper.WeatherDatapoint.TABLE_NAME, datapointValues,
-                        WeatherDbHelper.WeatherDatapoint._ID + " = ?", new String[]{Long.toString(datapointId)});
-            } else {
-                long datapointId = db.insert(WeatherDbHelper.WeatherDatapoint.TABLE_NAME, null, datapointValues);
-                ContentValues currentIdValues = new ContentValues();
-                currentIdValues.put(WeatherDbHelper.WeatherCurrent.COLUMN_LOCATION_ID, locationId);
-                currentIdValues.put(WeatherDbHelper.WeatherCurrent.COLUMN_CURRENT_DATAPOINT_ID, datapointId);
-
-                db.insert(WeatherDbHelper.WeatherCurrent.TABLE_NAME, null, currentIdValues);
-            }
-            cursor.close();
-        } finally {
-            db.close();
+        long datapointId = -1;
+        Cursor cursor = mWeatherDbHelper.queryWeatherCurrentByLocationId(locationId);
+        if (cursor.moveToFirst()) {
+            datapointId = cursor.getLong(cursor.getColumnIndex(WeatherDbHelper.WeatherCurrent.COLUMN_CURRENT_DATAPOINT_ID));
+            mWeatherDbHelper.updateWeatherDatapoint(datapointId, currently.getTime(), currently.getTemperature(), currently.getApparentTemperature(), currently.getPrecipType(), currently.getIcon());
+        } else {
+            datapointId = mWeatherDbHelper.insertWeatherDatapoint(currently.getTime(), currently.getTemperature(), currently.getApparentTemperature(), currently.getPrecipType(), currently.getIcon());
+            mWeatherDbHelper.insertWeatherCurrent(locationId, datapointId);
         }
     }
 
-    private long insertIntoWeatherLocation(double lat, double lon) {
-        SQLiteDatabase db = null;
-        try {
-            db = mWeatherDbHelper.getWritableDatabase();
-            Cursor cursor = db.query(WeatherDbHelper.WeatherLocation.TABLE_NAME,
-                    new String[] { WeatherDbHelper.WeatherLocation._ID },
-                    WeatherDbHelper.WeatherLocation.COLUMN_LATITUDE + " = ? AND " + WeatherDbHelper.WeatherLocation.COLUMN_LONGITUDE + " = ?" ,
-                    new String[] { Double.toString(lat), Double.toString(lon) },
-                    null,
-                    null,
-                    null);
-            if (cursor.moveToFirst()) {
-                long locationId = cursor.getLong(cursor.getColumnIndex(WeatherDbHelper.WeatherLocation._ID));
-                cursor.close();
-                return locationId;
-            } else {
-                cursor.close();
-
-                ContentValues values = new ContentValues();
-                values.put(WeatherDbHelper.WeatherLocation.COLUMN_LATITUDE, lat);
-                values.put(WeatherDbHelper.WeatherLocation.COLUMN_LONGITUDE, lon);
-
-                return db.insert(WeatherDbHelper.WeatherLocation.TABLE_NAME, null, values);
-            }
-        } catch (Exception e) {
-            Log.e("WeatherDataProvider", "Error inserting weather locations: " + e.getMessage());
-            return -1;
-        } finally {
-            if (db != null) {
-                try {
-                    db.close();
-                } catch (Exception e) {
-                    Log.e("WeatherDataProvider", "Error close database: " + e.getMessage());
-                }
-            }
-        }
-    }
 
 //    private long insertIntoWeatherDatapoint(long timestamp, double temperature, double feelsLike, String icon) {
 //        ContentValues values = new ContentValues() ;

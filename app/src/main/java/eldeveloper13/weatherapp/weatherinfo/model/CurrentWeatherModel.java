@@ -19,6 +19,14 @@ public class CurrentWeatherModel implements Parcelable {
     private PrecipType precipType;
     private WeatherIcon weatherIcon;
 
+    public CurrentWeatherModel(long timestamp, Double temperature, Double feelsLike, PrecipType precipType, WeatherIcon weatherIcon) {
+        this.timestamp = timestamp;
+        this.temperature = temperature;
+        this.feelsLike = feelsLike;
+        this.precipType = precipType;
+        this.weatherIcon = weatherIcon;
+    }
+
     public CurrentWeatherModel(ForecastResponse.DataPoint dataPoint) {
         this.timestamp = dataPoint.getTime();
         this.temperature = dataPoint.getTemperature();
@@ -74,7 +82,7 @@ public class CurrentWeatherModel implements Parcelable {
         Sleet("sleet", R.drawable.ic_sleet),
         Wind("wind", R.drawable.ic_wind),
         Fog("fog", R.drawable.ic_fog),
-        Cloud("cloud", R.drawable.ic_cloud),
+        Cloudy("cloudy", R.drawable.ic_cloud),
         PartlyCloudyDay("partly-cloudy-day", R.drawable.ic_partly_cloudy_day),
         PartlyCloudyNight("partly-cloudy-night", R.drawable.ic_partly_cloudy_night),
         None("none", 0);
