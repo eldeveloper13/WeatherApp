@@ -28,7 +28,7 @@ public class CurrentWeatherModel implements Parcelable {
     }
 
     public CurrentWeatherModel(ForecastResponse.DataPoint dataPoint) {
-        this.timestamp = dataPoint.getTime();
+        this.timestamp = dataPoint.getTime() * 1000;
         this.temperature = dataPoint.getTemperature();
         this.feelsLike = dataPoint.getApparentTemperature();
         this.weatherIcon = WeatherIcon.getValue(dataPoint.getIcon());

@@ -54,7 +54,6 @@ public class MainPresenter implements MainContract.Presenter {
 
                     @Override
                     public void onError(Throwable e) {
-                        Log.e(MainPresenter.this.getClass().getName(), e.getMessage());
                         mView.showError();
                     }
 

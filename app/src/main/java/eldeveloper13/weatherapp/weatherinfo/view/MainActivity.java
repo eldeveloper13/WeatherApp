@@ -1,5 +1,8 @@
 package eldeveloper13.weatherapp.weatherinfo.view;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -22,12 +25,17 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import eldeveloper13.weatherapp.R;
 import eldeveloper13.weatherapp.WeatherAppApplication;
+import eldeveloper13.weatherapp.services.StatusUpdateService;
+import eldeveloper13.weatherapp.services.UpdateReceiver;
+import eldeveloper13.weatherapp.services.darksky.DarkSkyService;
 import eldeveloper13.weatherapp.weatherinfo.MainContract;
 import eldeveloper13.weatherapp.weatherinfo.model.CurrentWeatherModel;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, MainContract.View {
 
+    public static final double LATITUDE = 43.6532;
+    public static final double LONGITUDE = -79.3832;
     @BindView(R.id.weather_tabs)
     View mWeatherTabs;
 
@@ -82,6 +90,16 @@ public class MainActivity extends AppCompatActivity
                 return false;
             }
         });
+
+        scheduleAlarm();
+    }
+
+    private void scheduleAlarm() {
+        Intent intent = UpdateReceiver.getIntent(getApplicationContext(), LATITUDE, LONGITUDE, DarkSkyService.CA);
+        final PendingIntent pendingIntent = PendingIntent.getBroadcast(this, UpdateReceiver.REQUEST_CODE, intent,PendingIntent.FLAG_UPDATE_CURRENT);
+        long firstMillis = System.currentTimeMillis();
+        AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, firstMillis, 5*60*1000, pendingIntent);
     }
 
     @Override
@@ -136,9 +154,14 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        if (id == R.id.nav_cancel_update) {
             // Handle the camera action
-            mPresenter.getWeather();
+//            mPresenter.getWeather();
+            Intent intent = UpdateReceiver.getIntent(getApplicationContext(), LATITUDE, LONGITUDE, DarkSkyService.CA);
+            final PendingIntent pendingIntent = PendingIntent.getBroadcast(this, UpdateReceiver.REQUEST_CODE, intent,PendingIntent.FLAG_UPDATE_CURRENT);
+
+            AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+            alarmManager.cancel(pendingIntent);
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {

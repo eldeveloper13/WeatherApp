@@ -7,14 +7,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import eldeveloper13.weatherapp.provider.WeatherDataProvider;
-import eldeveloper13.weatherapp.services.darksky.DarkSkyService;
-import eldeveloper13.weatherapp.services.darksky.ForecastResponse;
 import eldeveloper13.weatherapp.weatherinfo.MainContract;
 import eldeveloper13.weatherapp.weatherinfo.model.CurrentWeatherModel;
 import rx.Observable;
 import rx.Scheduler;
 import rx.android.plugins.RxAndroidPlugins;
 import rx.android.plugins.RxAndroidSchedulersHook;
+import rx.observers.TestSubscriber;
 import rx.schedulers.Schedulers;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -72,5 +71,15 @@ public class MainPresenterTest {
         assertThat(argument.getFeelsLike()).isEqualTo(8.7);
         assertThat(argument.getWeatherIcon()).isEqualTo(CurrentWeatherModel.WeatherIcon.PartlyCloudyDay);
         assertThat(argument.getPrecipType()).isEqualTo(CurrentWeatherModel.PrecipType.Rain);
+    }
+
+    @Test
+    public void getWeather_encountersError_shouldCallShowError() {
+        TestSubscriber<CurrentWeatherModel> testSubscriber = new TestSubscriber<>();
+        when(mWeatherDataProvider.getCurrentWeather(anyDouble(), anyDouble(), anyString(), any(WeatherDataProvider.FetchStrategy.class)))
+                .thenReturn(Observable.<CurrentWeatherModel>error(new Exception("Test error")));
+        mSubject.getWeather();
+
+        verify(mView).showError();
     }
 }

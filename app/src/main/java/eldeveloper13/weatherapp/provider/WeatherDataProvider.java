@@ -58,7 +58,7 @@ public class WeatherDataProvider {
 
     private boolean isDataExpired(CurrentWeatherModel currentWeatherModel) {
         long currentTime = Calendar.getInstance().getTimeInMillis();
-        return (currentTime - currentWeatherModel.getTimestamp() * 1000L) > STALE_AGE_MILLIS;
+        return (currentTime - currentWeatherModel.getTimestamp()) > STALE_AGE_MILLIS;
     }
 
     private Observable<CurrentWeatherModel> getForecastFromDatabase(final double lat, final double lon) {
