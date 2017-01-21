@@ -1,18 +1,16 @@
 package eldeveloper13.weatherapp.provider;
 
-import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.util.Calendar;
+import java.util.List;
 
 import eldeveloper13.weatherapp.db.WeatherDbHelper;
 import eldeveloper13.weatherapp.services.darksky.DarkSkyService;
 import eldeveloper13.weatherapp.services.darksky.ForecastResponse;
 import eldeveloper13.weatherapp.weatherinfo.model.CurrentWeatherModel;
 import rx.Observable;
-import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -56,6 +54,16 @@ public class WeatherDataProvider {
         }
     }
 
+    public Observable<List<CurrentWeatherModel>> getShortTermWeather(double latitude, double longitude, @DarkSkyService.Units String units) {
+        return Observable.empty();
+    }
+
+    public Observable<List<CurrentWeatherModel>> getShortTermWeather(double latitude, double longitude, @DarkSkyService.Units String units, FetchStrategy fetchStrategy) {
+        return Observable.empty();
+    }
+
+
+    //region helper methods
     private boolean isDataExpired(CurrentWeatherModel currentWeatherModel) {
         long currentTime = Calendar.getInstance().getTimeInMillis();
         return (currentTime - currentWeatherModel.getTimestamp()) > STALE_AGE_MILLIS;
@@ -146,7 +154,7 @@ public class WeatherDataProvider {
             mWeatherDbHelper.insertWeatherCurrent(locationId, datapointId);
         }
     }
-
+    //endregion
 
 //    private long insertIntoWeatherDatapoint(long timestamp, double temperature, double feelsLike, String icon) {
 //        ContentValues values = new ContentValues() ;

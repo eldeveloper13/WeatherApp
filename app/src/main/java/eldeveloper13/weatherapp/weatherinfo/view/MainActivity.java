@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity
 
 //        if (id == R.id.nav_cancel_update) {
 //            // Handle the camera action
-//            mPresenter.getWeather();
+//            mPresenter.loadWeather();
 //            Intent intent = UpdateReceiver.getIntent(getApplicationContext(), LATITUDE, LONGITUDE, DarkSkyService.CA);
 //            final PendingIntent pendingIntent = PendingIntent.getBroadcast(this, UpdateReceiver.REQUEST_CODE, intent,PendingIntent.FLAG_UPDATE_CURRENT);
 //
