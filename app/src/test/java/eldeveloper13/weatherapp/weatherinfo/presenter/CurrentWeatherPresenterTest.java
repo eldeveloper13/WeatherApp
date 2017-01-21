@@ -1,5 +1,6 @@
 package eldeveloper13.weatherapp.weatherinfo.presenter;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -7,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import eldeveloper13.weatherapp.provider.WeatherDataProvider;
+import eldeveloper13.weatherapp.weatherinfo.CurrentWeatherContract;
 import eldeveloper13.weatherapp.weatherinfo.MainContract;
 import eldeveloper13.weatherapp.weatherinfo.model.CurrentWeatherModel;
 import rx.Observable;
@@ -24,15 +26,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class MainPresenterTest {
+public class CurrentWeatherPresenterTest {
 
     @Mock
     WeatherDataProvider mWeatherDataProvider;
 
     @Mock
-    MainContract.View mView;
+    CurrentWeatherContract.View mView;
 
-    MainContract.Presenter mSubject;
+    CurrentWeatherContract.Presenter mSubject;
 
     @Before
     public void setup() {
@@ -44,9 +46,14 @@ public class MainPresenterTest {
         });
         MockitoAnnotations.initMocks(this);
 
-        mSubject = new MainPresenter(mWeatherDataProvider);
+        mSubject = new CurrentWeatherPresenter(mWeatherDataProvider);
 
         mSubject.attachView(mView);
+    }
+
+    @After
+    public void teardown() {
+        RxAndroidPlugins.getInstance().reset();
     }
 
     @Test
@@ -60,7 +67,7 @@ public class MainPresenterTest {
         when(mockResponse.getWeatherIcon()).thenReturn(CurrentWeatherModel.WeatherIcon.PartlyCloudyDay);
         when(mockResponse.getPrecipType()).thenReturn(CurrentWeatherModel.PrecipType.Rain);
 
-        mSubject.getWeather();
+        mSubject.getWeather(12.34, -12.34);
 
         ArgumentCaptor<CurrentWeatherModel> argumentCaptor = ArgumentCaptor.forClass(CurrentWeatherModel.class);
         verify(mView).showCurrentWeather(argumentCaptor.capture());
@@ -78,8 +85,8 @@ public class MainPresenterTest {
         TestSubscriber<CurrentWeatherModel> testSubscriber = new TestSubscriber<>();
         when(mWeatherDataProvider.getCurrentWeather(anyDouble(), anyDouble(), anyString(), any(WeatherDataProvider.FetchStrategy.class)))
                 .thenReturn(Observable.<CurrentWeatherModel>error(new Exception("Test error")));
-        mSubject.getWeather();
+        mSubject.getWeather(12.34, -12.34);
 
-        verify(mView).showError();
+        verify(mView).showError("Error loading weather: Test error");
     }
 }

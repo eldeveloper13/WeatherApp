@@ -1,32 +1,27 @@
 package eldeveloper13.weatherapp.weatherinfo.presenter;
 
-import android.util.Log;
-
 import javax.inject.Inject;
 
 import eldeveloper13.weatherapp.provider.WeatherDataProvider;
 import eldeveloper13.weatherapp.services.darksky.DarkSkyService;
-import eldeveloper13.weatherapp.services.darksky.ForecastResponse;
-import eldeveloper13.weatherapp.weatherinfo.MainContract;
+import eldeveloper13.weatherapp.weatherinfo.CurrentWeatherContract;
 import eldeveloper13.weatherapp.weatherinfo.model.CurrentWeatherModel;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 
-public class MainPresenter implements MainContract.Presenter {
+public class CurrentWeatherPresenter implements CurrentWeatherContract.Presenter {
 
     private final WeatherDataProvider mWeatherDataProvider;
-    MainContract.View mView;
+    CurrentWeatherContract.View mView;
 
     @Inject
-    public MainPresenter(WeatherDataProvider weatherDataProvider) {
+    public CurrentWeatherPresenter(WeatherDataProvider weatherDataProvider) {
         mWeatherDataProvider = weatherDataProvider;
     }
 
     @Override
-    public void attachView(MainContract.View view) {
+    public void attachView(CurrentWeatherContract.View view) {
         mView = view;
     }
 
@@ -36,14 +31,9 @@ public class MainPresenter implements MainContract.Presenter {
     }
 
     @Override
-    public void getCity() {
-        mView.setWeatherTabsVisible(true);
-    }
-
-    @Override
-    public void getWeather() {
+    public void getWeather(double latitude, double longitude) {
         mView.showSpinner();
-        Observable<CurrentWeatherModel> observable = mWeatherDataProvider.getCurrentWeather(43.6532, -79.3832, DarkSkyService.CA, WeatherDataProvider.FetchStrategy.CACHE_THEN_NETWORK);
+        Observable<CurrentWeatherModel> observable = mWeatherDataProvider.getCurrentWeather(latitude, longitude, DarkSkyService.CA, WeatherDataProvider.FetchStrategy.CACHE_THEN_NETWORK);
         observable
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Subscriber<CurrentWeatherModel>() {
@@ -54,11 +44,13 @@ public class MainPresenter implements MainContract.Presenter {
 
                     @Override
                     public void onError(Throwable e) {
-                        mView.showError();
+                        mView.hideSpinner();
+                        mView.showError("Error loading weather: " + e.getMessage());
                     }
 
                     @Override
                     public void onNext(CurrentWeatherModel currentWeatherModel) {
+                        mView.hideSpinner();
                         mView.showCurrentWeather(currentWeatherModel);
                     }
                 });

@@ -19,20 +19,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import javax.inject.Inject;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import eldeveloper13.weatherapp.R;
 import eldeveloper13.weatherapp.WeatherAppApplication;
-import eldeveloper13.weatherapp.services.StatusUpdateService;
 import eldeveloper13.weatherapp.services.UpdateReceiver;
 import eldeveloper13.weatherapp.services.darksky.DarkSkyService;
-import eldeveloper13.weatherapp.weatherinfo.MainContract;
-import eldeveloper13.weatherapp.weatherinfo.model.CurrentWeatherModel;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, MainContract.View {
+        implements NavigationView.OnNavigationItemSelectedListener {
 
     public static final double LATITUDE = 43.6532;
     public static final double LONGITUDE = -79.3832;
@@ -41,9 +36,6 @@ public class MainActivity extends AppCompatActivity
 
     @BindView(R.id.bottom_navigation)
     BottomNavigationView mBottomNavigationView;
-
-    @Inject
-    MainContract.Presenter mPresenter;
 
     Fragment mFragment;
     FragmentManager mFragmentManager;
@@ -69,7 +61,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         mFragmentManager = getSupportFragmentManager();
-        mFragment = new CurrentWeatherFragment();
+        mFragment = CurrentWeatherFragment.newInstance(LATITUDE, LONGITUDE);
         final FragmentTransaction transaction = mFragmentManager.beginTransaction();
         transaction.replace(R.id.navigation_main_content, mFragment).commit();
 
@@ -78,7 +70,7 @@ public class MainActivity extends AppCompatActivity
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_current:
-                        mFragment = CurrentWeatherFragment.newInstance();
+                        mFragment = CurrentWeatherFragment.newInstance(LATITUDE, LONGITUDE);
                         break;
                     case R.id.action_short_term:
                         break;
@@ -90,8 +82,8 @@ public class MainActivity extends AppCompatActivity
                 return false;
             }
         });
-
-        scheduleAlarm();
+        mWeatherTabs.setVisibility(View.VISIBLE);
+//        scheduleAlarm();
     }
 
     private void scheduleAlarm() {
@@ -100,20 +92,6 @@ public class MainActivity extends AppCompatActivity
         long firstMillis = System.currentTimeMillis();
         AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
         alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, firstMillis, 5*60*1000, pendingIntent);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mPresenter.attachView(this);
-        mPresenter.getCity();
-        mPresenter.getWeather();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mPresenter.detachView();
     }
 
     @Override
@@ -154,53 +132,29 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_cancel_update) {
-            // Handle the camera action
+//        if (id == R.id.nav_cancel_update) {
+//            // Handle the camera action
 //            mPresenter.getWeather();
-            Intent intent = UpdateReceiver.getIntent(getApplicationContext(), LATITUDE, LONGITUDE, DarkSkyService.CA);
-            final PendingIntent pendingIntent = PendingIntent.getBroadcast(this, UpdateReceiver.REQUEST_CODE, intent,PendingIntent.FLAG_UPDATE_CURRENT);
-
-            AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
-            alarmManager.cancel(pendingIntent);
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
+//            Intent intent = UpdateReceiver.getIntent(getApplicationContext(), LATITUDE, LONGITUDE, DarkSkyService.CA);
+//            final PendingIntent pendingIntent = PendingIntent.getBroadcast(this, UpdateReceiver.REQUEST_CODE, intent,PendingIntent.FLAG_UPDATE_CURRENT);
+//
+//            AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+//            alarmManager.cancel(pendingIntent);
+//        } else if (id == R.id.nav_gallery) {
+//
+//        } else if (id == R.id.nav_slideshow) {
+//
+//        } else if (id == R.id.nav_manage) {
+//
+//        } else if (id == R.id.nav_share) {
+//
+//        } else if (id == R.id.nav_send) {
+//
+//        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-
-    //region MainContract.View
-    @Override
-    public void setWeatherTabsVisible(boolean visible) {
-        mWeatherTabs.setVisibility(visible ? View.VISIBLE : View.GONE);
-    }
-
-    @Override
-    public void showSpinner() {
-        // TODO
-    }
-
-    @Override
-    public void showCurrentWeather(CurrentWeatherModel model) {
-        if (mFragment instanceof CurrentWeatherFragment) {
-            ((CurrentWeatherFragment) mFragment).showCurrentWeather(model);
-        }
-    }
-
-    @Override
-    public void showError() {
-
     }
     //endregion
 }

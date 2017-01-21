@@ -12,8 +12,8 @@ import eldeveloper13.weatherapp.db.WeatherDbHelper;
 import eldeveloper13.weatherapp.provider.WeatherDataProvider;
 import eldeveloper13.weatherapp.services.darksky.DarkSkyService;
 import eldeveloper13.weatherapp.services.network.CacheRevalidationInterceptor;
-import eldeveloper13.weatherapp.weatherinfo.MainContract;
-import eldeveloper13.weatherapp.weatherinfo.presenter.MainPresenter;
+import eldeveloper13.weatherapp.weatherinfo.CurrentWeatherContract;
+import eldeveloper13.weatherapp.weatherinfo.presenter.CurrentWeatherPresenter;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -61,7 +61,8 @@ public class AppModule {
     }
 
     @Provides
-    MainContract.Presenter provideMainPresenter(MainPresenter presenter) {
+    @Singleton
+    CurrentWeatherContract.Presenter provideCurrentWeatherPresenter(CurrentWeatherPresenter presenter) {
         return presenter;
     }
 

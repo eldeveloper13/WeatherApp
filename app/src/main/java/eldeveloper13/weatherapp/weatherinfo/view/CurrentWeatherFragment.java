@@ -2,12 +2,16 @@ package eldeveloper13.weatherapp.weatherinfo.view;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -34,16 +38,32 @@ public class CurrentWeatherFragment extends Fragment implements CurrentWeatherCo
     @BindView(R.id.last_updated)
     TextView mLastUpdateTextView;
 
+    @BindView(R.id.progress_bar)
+    ProgressBar mProgressBar;
     CurrentWeatherModel mModel;
 
-    public static CurrentWeatherFragment newInstance() {
-        return new CurrentWeatherFragment();
+    @Inject
+    CurrentWeatherContract.Presenter mPresenter;
+
+    double mLatitude;
+    double mLongitude;
+
+    public static CurrentWeatherFragment newInstance(double latitude, double longitude) {
+        CurrentWeatherFragment fragment = new CurrentWeatherFragment();
+        Bundle bundle = new Bundle();
+        bundle.putDouble(Extras.LATITUDE, latitude);
+        bundle.putDouble(Extras.LONGITUDE, longitude);
+        fragment.setArguments(bundle);
+        return fragment;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_current_weather, container, false);
+        ((WeatherAppApplication) getActivity().getApplication()).getAppComponent().inject(this);
         ButterKnife.bind(this, view);
+        mLatitude = getArguments().getDouble(Extras.LATITUDE);
+        mLongitude = getArguments().getDouble(Extras.LONGITUDE);
         return view;
     }
 
@@ -51,6 +71,19 @@ public class CurrentWeatherFragment extends Fragment implements CurrentWeatherCo
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ((WeatherAppApplication) getActivity().getApplication()).getAppComponent().inject(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mPresenter.attachView(this);
+        mPresenter.getWeather(mLatitude, mLongitude);
+    }
+
+    @Override
+    public void onPause() {
+        mPresenter.detachView();
+        super.onPause();
     }
 
     //region CurrentWeatherContractor.View Methods
@@ -67,9 +100,25 @@ public class CurrentWeatherFragment extends Fragment implements CurrentWeatherCo
         mWeatherIconTextView.setText(model.getWeatherIcon().name());
         mLastUpdateTextView.setText(String.format("Last Updated: %s", DateTimeUtil.getDate(model.getTimestamp() * 1000)));
     }
+
+    @Override
+    public void showSpinner() {
+        mProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void hideSpinner() {
+        mProgressBar.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void showError(String error) {
+        Snackbar.make(getView(), error, Snackbar.LENGTH_LONG).show();
+    }
     //endregion
 
-    static class Extra {
-        private static final String MODEL = "model";
+    static class Extras {
+        static final String LATITUDE = "latitude";
+        static final String LONGITUDE = "longitude";
     }
 }

@@ -67,4 +67,10 @@
         android:textSize="12sp"
         tools:text="Last Update: 11:23:04 am"
         />
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
 </RelativeLayout>
