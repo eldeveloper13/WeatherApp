@@ -61,7 +61,6 @@ public class AppModule {
     }
 
     @Provides
-    @Singleton
     CurrentWeatherContract.Presenter provideCurrentWeatherPresenter(CurrentWeatherPresenter presenter) {
         return presenter;
     }

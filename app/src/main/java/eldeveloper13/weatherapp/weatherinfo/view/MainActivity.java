@@ -40,6 +40,8 @@ public class MainActivity extends AppCompatActivity
     Fragment mFragment;
     FragmentManager mFragmentManager;
 
+    CurrentWeatherFragment mCurrentWeatherFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,7 +72,7 @@ public class MainActivity extends AppCompatActivity
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_current:
-                        mFragment = CurrentWeatherFragment.newInstance(LATITUDE, LONGITUDE);
+                        mFragment = getCurrentWeatherFragment();
                         break;
                     case R.id.action_short_term:
                         break;
@@ -84,6 +86,13 @@ public class MainActivity extends AppCompatActivity
         });
         mWeatherTabs.setVisibility(View.VISIBLE);
 //        scheduleAlarm();
+    }
+
+    private Fragment getCurrentWeatherFragment() {
+        if (mCurrentWeatherFragment == null) {
+            mCurrentWeatherFragment = CurrentWeatherFragment.newInstance(LATITUDE, LONGITUDE);
+        }
+        return mCurrentWeatherFragment;
     }
 
     private void scheduleAlarm() {

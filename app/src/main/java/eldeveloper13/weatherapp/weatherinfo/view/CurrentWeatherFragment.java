@@ -40,6 +40,7 @@ public class CurrentWeatherFragment extends Fragment implements CurrentWeatherCo
 
     @BindView(R.id.progress_bar)
     ProgressBar mProgressBar;
+
     CurrentWeatherModel mModel;
 
     @Inject

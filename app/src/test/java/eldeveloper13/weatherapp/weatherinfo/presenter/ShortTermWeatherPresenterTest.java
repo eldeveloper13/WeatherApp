@@ -62,6 +62,8 @@ public class ShortTermWeatherPresenterTest {
     @Test
     public void loadWeather_shouldCallShowSpinner_thenCallGetShortTermWeather() {
         InOrder inOrder = Mockito.inOrder(mWeatherDataProvider, mView);
+        when(mWeatherDataProvider.getShortTermWeather(anyDouble(), anyDouble(), anyString()))
+                .thenReturn(Observable.<List<CurrentWeatherModel>>empty());
 
         mSubject.loadWeather(123.45, -123.45);
 

@@ -55,13 +55,12 @@ public class WeatherDataProvider {
     }
 
     public Observable<List<CurrentWeatherModel>> getShortTermWeather(double latitude, double longitude, @DarkSkyService.Units String units) {
-        return Observable.empty();
+        return getShortTermWeather(latitude, longitude, units, FetchStrategy.CACHE_THEN_NETWORK);
     }
 
     public Observable<List<CurrentWeatherModel>> getShortTermWeather(double latitude, double longitude, @DarkSkyService.Units String units, FetchStrategy fetchStrategy) {
         return Observable.empty();
     }
-
 
     //region helper methods
     private boolean isDataExpired(CurrentWeatherModel currentWeatherModel) {
